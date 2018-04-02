@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+<style>
+    body,html{
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+    }
+    body{
+        margin: 0;
+        padding: 0;
+    }
+    section{
+        padding: 10px;
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+        box-sizing: border-box;
+    }
+    section div{
+        width: 50px;
+        height: 50px;
+        background-color: #ff318e;
+        line-height: 50px;
+        color:#fff;
+    }
+    p{
+        padding: 10px;
+        display: flex;
+        justify-content: space-between;
+    }
+    .jindu{
+        box-sizing: border-box;
+        width: 100%;
+        height: 8px;
+        background-color: #ff318e;
+        border-radius: 8px;
+    }
+    .jindu span{
+        display: block;
+        width: 0;
+        height: 100%;
+        background-color: #bababa;
+        border-radius: 8px;
+    }
+    .prev{
+        background: url("prve.png") no-repeat center/cover;
+    }
+    .next{
+        background: url("next.png") no-repeat center/cover;
+    }
+    .play{
+        background: url('pause.png') no-repeat center/cover;
+    }
+</style>
+<body>
+<audio></audio>
+<section>
+    <div class="prev"></div>
+    <div class="play"></div>
+    <div class="next"></div>
+</section>
+<p>
+    <span class="cur">00:00</span>
+    <span class="dur"></span>
+</p>
+<div style="padding: 0 10px">
+    <div class="jindu">
+        <span></span>
+    </div>
+</div>
+
+</body>
+</html>
+<script>
+    var yinyueku = ['赵雷%20-%20画.mp3','chengdu.mp3'];
+    const  length= yinyueku.length;
+    var index=0;
+    var audio =document.querySelector('audio')
+    var jindu = document.querySelector('.jindu span')
+    audio.autoplay=true;
+    var play=document.querySelector('.play');
+    play.onclick=function () {
+        if(audio.paused){
+            audio.play()
+            play.style.background="url('pause.png') no-repeat center/cover"
+        }else{
+            audio.pause()
+            play.style.background="url('gc4.png') no-repeat center/cover"
+        }
+    }
+    //设置时间的格式
+    function timeModel(time) {
+        let m=Math.floor(time/60)<10 ? '0'+Math.floor(time/60) : Math.floor(time/60);
+        let s=Math.floor(time%60)<10 ? '0'+Math.floor(time%60) : Math.floor(time%60);
+        return m+':'+s;
+    }
+
+//监听播放
+    audio.ontimeupdate=function () {
+        let cur=document.querySelector('.cur');
+        let dur=document.querySelector('.dur')
+        cur.innerHTML=timeModel(audio.currentTime)
+        dur.innerHTML=timeModel(audio.duration);
+        let bili = audio.currentTime/audio.duration;
+        jindu.style.width=bili*100+'%';
+    }
+    //上一首
+        var prev=document.querySelector('.prev');
+        prev.onclick=function () {
+            index--
+            if(index<=0){
+                index=0;
+            }else{
+                index--
+            }
+            audio.src=yinyueku[index]
+
+        }
+    //下一首
+        var next=document.querySelector('.next');
+        next.onclick=function () {
+            index++;
+            if(index>=length-1){
+                index=1
+            }else{
+                index++;
+            }
+            audio.src=yinyueku[index]
+
+        }
+    audio.src=yinyueku[index]
+</script>
