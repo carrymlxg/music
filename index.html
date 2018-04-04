@@ -6,6 +6,8 @@
           content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Document</title>
+    <script src="jquery-3.2.1.js"></script>
+    <script src="iscroll.js"></script>
 </head>
 <style>
     body,html{
@@ -16,6 +18,33 @@
     body{
         margin: 0;
         padding: 0;
+        background:url("ggc.png") center/cover;
+    }
+    .wrapper{
+        width:100%;
+        height:50%;
+        padding-bottom: 10px;
+        box-sizing: border-box;
+        position: fixed;
+        top:15px;
+        left:0;
+        z-index: 999;
+        overflow: hidden;
+    }
+    .conter{
+        list-style: none;
+        width: 100%;
+        height: auto;
+        padding: 0;
+    }
+    .conter>li{
+        color: #fff;
+        text-align: center;
+        line-height: 1.5;
+    }
+    .box{
+        width: 100%;
+        height: 70%;
     }
     section{
         padding: 10px;
@@ -62,6 +91,10 @@
 </style>
 <body>
 <audio></audio>
+<div class="wrapper">
+    <ul class="conter"></ul>
+</div>
+<div class="box"></div>
 <section>
     <div class="prev"></div>
     <div class="play"></div>
@@ -80,7 +113,9 @@
 </body>
 </html>
 <script>
+    $(function () {
     var yinyueku = ['赵雷%20-%20画.mp3','chengdu.mp3'];
+    var lyric=[];
     const  length= yinyueku.length;
     var index=0;
     var audio =document.querySelector('audio')
@@ -104,13 +139,41 @@
     }
 
 //监听播放
+    let a=0;
     audio.ontimeupdate=function () {
         let cur=document.querySelector('.cur');
         let dur=document.querySelector('.dur')
-        cur.innerHTML=timeModel(audio.currentTime)
+        let  ct  = timeModel(audio.currentTime);
+
+        cur.innerHTML=ct
         dur.innerHTML=timeModel(audio.duration);
         let bili = audio.currentTime/audio.duration;
         jindu.style.width=bili*100+'%';
+        lyric.forEach((ele,i)=>{
+
+            if(ele.t == ct){
+                a=i;
+                if(i<=3){
+                    i=0;
+                }else{
+                    i-=3;
+                }
+                $('.conter').empty();
+                let str='';
+                for(let j=i;j<lyric.length;j++){
+                    str +=`
+                      <li class="lis${j}">${lyric[j]['c']}</li>
+                    `
+                }
+                $('.conter').html(str);
+                $('.lis'+a).css('color','#008ed0');
+            }
+            myScroll=new IScroll('.wrapper');
+        });
+
+
+
+
     }
     //上一首
         var prev=document.querySelector('.prev');
@@ -121,8 +184,8 @@
             }else{
                 index--
             }
-            audio.src=yinyueku[index]
-
+            audio.src=yinyueku[index];
+            getlyric(index);
         }
     //下一首
         var next=document.querySelector('.next');
@@ -134,7 +197,35 @@
                 index++;
             }
             audio.src=yinyueku[index]
-
+            getlyric(index);
         }
-    audio.src=yinyueku[index]
+    //歌词
+    function getlyric(index) {
+            console.log(`json/${yinyueku[index].slice(0,-4)}.json`)
+        $.ajax(`json/${yinyueku[index].slice(0,-4)}.json`,{
+            success:function (data) {
+                lyric.length=0;
+                let value=data.lrc.lyric.split('\n');
+                value.forEach(element=>{
+                    let t=element.substr(1,5);
+                    let c=element.substr(element.indexOf(']')+1);
+                    lyric.push({t,c});
+                })
+                render(lyric);
+            }
+        })
+    }
+    function render(lyric) {
+        let str='';
+        $('.conter').empty();
+        lyric.forEach((ele,i)=>{
+            str=`
+              <li class="lis${i}">${ele.c}</li>
+            `
+        })
+        $('.conter').html(str);
+    }
+    audio.src=yinyueku[index];
+    getlyric(index);
+    })
 </script>
